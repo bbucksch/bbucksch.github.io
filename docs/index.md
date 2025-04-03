@@ -24,3 +24,10 @@ This project investigates the fine-tuning of object detection models, in particu
 
 Being able to accurately sort trash and recycle is very important for sustainable living in today’s world. In the Netherlands, trash-sorting plays an especially important role. However, this can represent a challenge for newcomers who, due to their backgrounds, may not be familiar with these practices. Apart from disrupting recycling efforts and increasing costs, incorrect trash sorting can lead to unexpected fines for those who are unaware. This project aims to provide a step in the direction of making the recycling system more newcomer-friendly by developing a robust computer vision-based trash-sorting algorithm. Using an existing object detection model and a custom dataset built for this purpose, various types of trash are identified and classified. The system's robustness is then tested with real-life images to ensure its accuracy. This innovation not only hopes to help newcomers adapt to Dutch recycling norms, but also to improve overall waste management efficiency. 
 
+## BACKGROUND
+
+
+## METHODOLOGY
+
+## 
+
