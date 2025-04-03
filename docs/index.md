@@ -20,7 +20,7 @@
 
 This project investigates the fine-tuning of object detection models, in particular YOLO v8, for the task of identifying and classifying different types of trash in images. Due to the lack of a suitable labeled dataset, a custom dataset is created by editing individual trash objects - such as plastic bottles - and their respective bounding boxes into a background image. Data augmentation techniques, including rotation, scaling, and color manipulation, are applied to make the dataset more realistic and improve the model's robustness and generalizability. In order to test whether the model is able to adapt to real-life scenarios, the test set consists of real (un-edited) annotated images containing trash. Furthermore, two different types of backgrounds are tested to determine what is most effective: white and natural backgrounds. The fine-tuned model achieved a mean average precision (mAP) of **X%** on the test set, proving its effectiveness in detecting and categorizing different trash types. This work shows that by simply fine-tuning existing object detection models, these can perform accurately in complex tasks even if trained on non-real images.
 
-<!-- COMMENT -->
+<!-- CHANGE PRECISION -->
 
 ## INTRODUCTION
 
@@ -34,11 +34,15 @@ Being able to accurately sort trash and recycle is very important for sustainabl
 
 ## METHODOLOGY
 
-### Background comparison
+The most efficient method to make a model that classifies different types of waste is to use an existing classifier model, and train only the last (few) layers to adapt to the new objects that should be classified, while keeping the rest of the weights frozen. A robust initial model has to be used for this purpose so that it can generalize well.
+
+In order to explore the extent to which the modified model generalizes
+
+### Image background
 
 ### Model choice
+<!-- Why YOLO v8 -->
 
-### 
 
 
 ## RESULTS
