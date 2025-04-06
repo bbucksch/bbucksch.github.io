@@ -24,15 +24,17 @@ This project investigates the fine-tuning of object detection models, in particu
 
 ## INTRODUCTION
 
-Being able to accurately sort trash and recycle is very important for sustainable living in today’s world. In the Netherlands, trash-sorting plays an especially important role. However, this can represent a challenge for newcomers who, due to their backgrounds, may not be familiar with these practices. Apart from disrupting recycling efforts and increasing costs, incorrect trash sorting can lead to unexpected fines for those who are unaware. This project aims to provide a step in the direction of making the recycling system more newcomer-friendly by developing a robust computer vision-based trash-sorting algorithm, that tells users where to throw pieces of trash identified in an image that the user obtains e.g. by taking a photo with their phone. Using an existing object detection model and a custom dataset built for this purpose, various types of trash are identified and classified. The system's robustness is then tested with real-life images to ensure its accuracy. This innovation not only hopes to help newcomers adapt to Dutch recycling norms, but also to improve overall waste management efficiency. 
+Being able to accurately sort trash and recycle is very important for sustainable living in today’s world. In the Netherlands, trash-sorting plays an especially important role. However, this can represent a challenge for newcomers who, due to their backgrounds, may not be familiar with these practices. Apart from disrupting recycling efforts and increasing costs, incorrect trash sorting can lead to unexpected fines for those who are unaware. This project aims to provide a step in the direction of making the recycling system more newcomer-friendly by developing a robust computer vision-based trash-sorting algorithm, that tells users where to throw pieces of trash identified in an image that the user obtains e.g. by taking a photo with their phone. This innovation not only hopes to help newcomers adapt to Dutch recycling norms, but also to improve overall waste management efficiency. 
 
-Specifically, we seek to build a system that indicates which recycling category (paper, metal, etc.) each individual object in an image belongs to. The simpler case of one object per image is a standard object recognition problem, which can be solved by a classifier trained on a dataset such as [1]. However, in realistic scenarios, trash appears in piles - a more difficult case of multi-instance object detection/classification. Given an appropriate dataset, the problem could be solved by fine-tuning a network such as YOLO [2]. However, while there exists a dataset of individual images with their recycling class labels [3], there is no multi-instance equivalent. In our work, we examine the possibility of making our own synthetic dataset for the task by merging images from [3] into a single image with consequently known labels, while applying appropriate augmentations to enhance generalizability to a real-world domain. Our research question follows naturally:
+Specifically, we seek to build a system that indicates which recycling category (paper, metal, etc.) each individual object in an image belongs to; the simpler case of one object per image is a standard object recognition problem. However, in realistic scenarios, trash appears in piles - a more difficult case of multi-instance object detection/classification. Given an appropriate dataset, the problem could be solved by fine-tuning a network such as YOLO [2]. However, while there exists a dataset of individual images with their recycling class labels [3], there is no multi-instance equivalent. In our work, we examine the possibility of making our own synthetic dataset for the task by merging images from [3] into a single image with consequently known labels, while applying appropriate augmentations to enhance generalizability to a real-world domain. To evaluate generalization, we hand-annotate 20 real-world images, and run inference on them using models trained on our synthetic datasets. Our research question follows naturally:
 
 __How to best generate a multi-instance recycling object image dataset that generalizes to real-world examples?__ 
 
-## BACKGROUND
+## RELATED WORKS
 
-YOLOv8 and tuning
+Niu et. al. [7] have surveyed a range of techniques for realistic image composition. They have identified a set of common problems such as illumination or geometric inconsistency, and have proposed techniques for correcting the visual aspects of appended foreground components. However, virtually all works listed in the survey focus on cases with well-defined structure, i.e. where great attention is given to harmonizing a single object. This is not representative of our task, where the semantic structure is much less important than physics and real-world-context informed details such as the possible positions of trash items and their relative sizes. Furthermore, striving for realism ignores a possibly even more severe problem - the massive intra-class variability of broad recycling classes such as "plastic" or "metal".
+
+A domain-specific attempt to classify multi-instance trash images was proposed by [1], who used a height-sensor at a recycling processing facility to label images of just three classes ("PET", "HDPE", "Aluminium"). With the advanced setup and limited variability (same lighting, conveyor belt background), the authors achieved an mAP of 0.64. The authors cited labelling issues as an important limitation. While our task covers a broader domain of potential input images, we believe that training on artificial data may result in better accuracy since there are significantly fewer labelling challenges. Similarly, departing from a consistent setting may offer greater opportunities for generalization beyond seen objects.
 
 ## METHODOLOGY
 
@@ -43,7 +45,7 @@ Our goal is to generate a synthetic dataset by merging images from [3] onto a ba
 1. __Image size__: Each generated images has dimensions 640x640.
 1. __Object count__ (sampled ~ N(8,2)): The number of individual pieces of garbage that appear in an image, rounded to the nearest positive integer.
 2. __Object center x and y positions__ (sampled ~ N(320, 108)): The position where each object is centered. Using a normal distribution centered at the image's center is motivated by the need to form realistic piles.
-3. __Object rescale heigh and width__ (sampled ~ N(256, 64)): The new size of the object added to the image. The resultant stretch is meant to simulate unexpected angles with the camera, as well as intra-class variations.
+3. __Object rescale height and width__ (sampled ~ N(256, 64)): The new size of the object added to the image. The resultant stretch is meant to simulate unexpected angles with the camera, as well as intra-class variations.
 4. __Object rotation__: We randomly rotate each object, as piles of trash rarely have orientation, especially when photographed from above.
 5. __Maximum tolerated occlusion__ (50%): After pasting images on top of existing ones, older images may become too occluded. To address this, we only include labels for object whose pixels remain at least 50% not covered.
 
@@ -67,12 +69,17 @@ We briefly summarize the advanced techniques we tried using to enhance the reali
 
 Despite the failures, we learn that simple augmentations are more reliable than advanced methods, which should theoretically result in better generalization accuracy.
 
-### Model choice
+### Model & Training
 <!-- Why YOLO v8 -->
 
 The most efficient method to make a model that classifies different types of waste is to use an existing classifier model, and train only the last (few) layers to adapt to the new objects that should be classified, while keeping the rest of the weights frozen. A robust initial model has to be used for this purpose so that it can generalize well.
 
-In order to explore the extent to which the modified model generalizes
+We do not aim to maximize accuracy at all costs by picking a state-of-the-art image recognition model, as that is not the focus of our research. We use the industry standard YOLOv8 [2], as it is widely studied and provides high accuracy at a small computation cost. Specifially, we use the YOLOv8 Nano model to minimize fine-tuning time in favour of rapid iteration.
+
+We fine-tune the pre-trained YOLOv8n model provided by Ultralytics. We use the default training regime provided by the Ultralytics Python library, and Weights&Biases for experiment tracking. We generate 10k images from our two investigated settings (white and textured backgrounds), and fine-tune for 100 epochs. As can be seen from Figure 3, the settings result in convergence and avoid overfitting when training on synthetic data.
+
+![](../media/training_curves.png "Title")
+__Figure 3__: Loss and mAP curves in training and validation. Synthetic textured background image dataset results.
 
 ## RESULTS
 
@@ -93,3 +100,5 @@ In order to explore the extent to which the modified model generalizes
 - [5]: Zhang, H., & Dana, K. (2018). Multi-style generative network for real-time transfer. In Proceedings of the European Conference on Computer Vision (ECCV) Workshops (pp. 0-0).
 
 - [6]: He, K., Chen, X., Xie, S., Li, Y., Dollár, P., & Girshick, R. (2022). Masked autoencoders are scalable vision learners. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition (pp. 16000-16009).
+
+- [7]: Niu, L., Cong, W., Liu, L., Hong, Y., Zhang, B., Liang, J., & Zhang, L. (2021). Making images real again: A comprehensive survey on deep image composition. arXiv preprint arXiv:2106.14490.
