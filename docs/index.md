@@ -82,10 +82,42 @@ We fine-tune the pre-trained YOLOv8n model provided by Ultralytics. We use the d
 __Figure 3__: Loss and mAP curves in training and validation. Synthetic textured background image dataset results.
 
 ## RESULTS
+To evaluate whether training on more realistic synthetic images leads to better performance on real-world data, we tested our two YOLOv8n models—one trained on white-background synthetic images and the other trained on textured-background synthetic images—on a set of 30 real-world images that we captured and manually labeled. Each image contained multiple pieces of trash, and we used a custom GUI to draw bounding boxes and assign labels for each object.
+
+Table 1 summarizes the performance of both models. We report **precision**, **recall**, **mAP@0.50**, and **mAP@[0.50–0.95]**, which are standard metrics for object detection. We also include a “*fitness*” metric as computed by the YOLOv8 library, which offers a single-value proxy for overall performance.
+
+| **Training Data**           | **Precision** | **Recall** | **mAP@0.50** | **mAP@0.50–0.95** | **Fitness** |
+|-----------------------------|---------------|-----------|-------------|-------------------|------------|
+| White-Background (WB)      | 0.3973        | 0.2946    | 0.2890      | 0.1881            | 0.1982     |
+| Textured-Background (TB)   | 0.5811        | 0.4545    | 0.4850      | 0.2836            | 0.3037     |
+
+Despite both models being trained purely on synthetic images, the textured-background model demonstrates higher precision (+18.4%), higher recall (+16.0%), and an improved mAP@0.50 (+19.6%) relative to the white-background model. A similar trend is observed for mAP@[0.50–0.95] and the fitness metric.
+
+These results suggest that increasing the realism of the synthetic training images (e.g., adding diverse natural backgrounds) helps the model adapt more effectively to real-world scenes. While the overall performance remains below what might be desired in a production system, the improvements indicate that bridging the domain gap between synthetic and real data is a promising direction.
 
 ## ANALYSIS
 
+The results indicate a clear performance difference between models trained on white-background versus textured-background synthetic images. Although both models were trained exclusively on artificial data, the model that incorporated more realistic backgrounds exhibited substantially higher precision, recall, and mAP on our small 30-image real-world test set. This suggests that domain closeness—achieved by adding diverse natural textures and lighting variations—plays a key role in helping the model generalize.
+
+1.	Domain Gap
+Despite the improved performance of the textured-background model, its overall detection and classification accuracy in real-world images remains modest. This underscores a persistent domain gap between synthetic training data and real-world imagery. Variations in object appearance, lighting, and occlusion can be more extreme in reality than in synthetic images, making it difficult for models to fully adapt.
+
+2.	Impact of Background Diversity
+The addition of realistic backgrounds appears to lessen this gap. Incorporating different patterns, colors, and contexts in the synthetic images helps the model learn features that are more transferable to real scenes. By contrast, the white-background images lead to limited variation in training data, which affects generalization to real-world clutter and variations in lighting.
+
+3.	Occlusion and Class Confusions
+Anecdotal observations from test images revealed that occluded or overlapping objects remain a challenge. Although synthetic data was designed to permit partial overlap, it often does not capture the full complexity of real-world scenes, such as transparent plastics, reflections on metallic items, or unusual object shapes. Consequently, certain classes are misclassified or missed entirely when objects are heavily occluded.
+
+4.	Small Real-World Test Set
+Because the real-world evaluation involved only 30 images, the overall metrics must be interpreted with caution. While the trends are informative, future work with a larger, more diverse test set would provide a more robust estimate of real-world performance.
+
+Overall, findings confirm that increasing the realism of synthetic datasets significantly benefits model generalization to real-world trash detection, though a noticeable domain gap remains.
+
 ## CONCLUSION & DISCUSSION
+
+This work demonstrates the feasibility of using synthetic images to train an object detection model for multi-instance trash classification, even in the absence of an extensive real-world dataset. By systematically generating synthetic piles of trash with carefully managed bounding boxes, we were able to fine-tune a YOLOv8n model that recognizes and categorizes objects such as plastic, paper, and metal. Crucially, our experiments revealed that increasing the realism of synthetic backgrounds leads to higher performance on real-world images: the model trained on textured-background data outperformed its white-background counterpart by a significant margin in every relevant metric.
+
+Yet, our results also highlight that a noticeable domain gap remains. While textured synthetic images bring the training distribution closer to real-world conditions, mismatches in lighting, object appearances, occlusions, and contextual details still affect generalization. Evaluations on a small set of 30 real images—though indicative—underscore the need for larger and more diverse datasets to further validate performance and reliability. In practical implementations, even moderate misclassification could undermine user trust and the overall utility of an automated recycling assistive tool.
 
 ## References
 
