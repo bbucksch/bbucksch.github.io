@@ -20,7 +20,7 @@
 
 ## ABSTRACT
 
-This project investigates the fine-tuning of object detection models, in particular YOLO v8, for the task of identifying and classifying different types of trash in images. Due to the lack of a suitable labeled dataset, a custom dataset is created by editing individual trash objects - such as plastic bottles - and their respective bounding boxes into a background image. Data augmentation techniques, including rotation, scaling, and color manipulation, are applied to make the dataset more realistic and improve the model's robustness and generalizability. In order to test whether the model is able to adapt to real-life scenarios, the test set consists of real (un-edited) annotated images containing trash. Furthermore, two different types of backgrounds are tested to determine what is most effective: white and natural backgrounds. The fine-tuned model achieved a mean average precision (mAP) of **X%** on the test set, proving its effectiveness in detecting and categorizing different trash types. This work shows that by simply fine-tuning existing object detection models, these can perform accurately in complex tasks even if trained on non-real images.
+This project investigates the fine-tuning of object detection models, in particular YOLO v8, for the task of identifying and classifying different types of trash in images. Due to the lack of a suitable labeled dataset, a custom dataset is created by editing individual trash objects - such as plastic bottles - and their respective bounding boxes into a background image. Data augmentation techniques, including rotation, scaling, and color manipulation, are applied to make the dataset more realistic and improve the model's robustness and generalizability. In order to test whether the model is able to adapt to real-life scenarios, the test set consists of real (un-edited) annotated images containing trash. Furthermore, two different types of backgrounds are tested to determine what is most effective: white and natural backgrounds. The best performing fine-tuned model achieved an mAP@0.50 score of **0.4850** on the test set, proving its effectiveness in detecting and categorizing different trash types. This work shows that by simply fine-tuning existing object detection models, these can perform accurately in complex tasks even if trained on non-real images.
 
 <!-- CHANGE PRECISION -->
 
@@ -70,6 +70,14 @@ We briefly summarize the advanced techniques we tried using to enhance the reali
 4. We attempted to use an an ensemble of straightforward augmentations provided by the Albumentations Python library, alongside a histogram matching technique to reduce the color discrepancies between the background and the added objects. However, this results in color/object appearance distortion beyond what is realistic. With appropriate parameter tuning these ideas may be beneficial, but the process is too time-consuming.
 
 Despite the failures, we learn that simple augmentations are more reliable than advanced methods, which should theoretically result in better generalization accuracy.
+
+### Domain Distance Measure
+
+In order to ensure that our expectations are correct, the domain distances between the textured-background and the real-world images, and between the white-background and the real-world images needs to be measured. If the textured-background distance is smaller, the model should in theory perform better when trained with those, since they are closer to what a real-world image would look like. 
+
+The measuring is done using the popular Wasserstein distance, a metric that measures the distance between two probability distributions. It is intuitively described as: if each distribution (in this case image) is viewed as a unit amount of soil piled on a metric space M, the result is the minimum "cost" of turning one pile into the other, or in terms of work, amount of soil times the mean distance it is moved.
+
+The normalized domain distance between the textured-background images and the real-world images is calculated as **0.1188**, while for the white-background images it is **0.4101**. This confirms our assumption that images with a textured background are significantly closer in domain to the real-world images than those with a white background.
 
 ### Model & Training
 <!-- Why YOLO v8 -->
