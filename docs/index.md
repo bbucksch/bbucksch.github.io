@@ -77,7 +77,7 @@ In order to ensure that our expectations are correct, the domain distances betwe
 
 The measuring is done using the popular Wasserstein distance, a metric that measures the distance between two probability distributions. It is intuitively described as: if each distribution (in this case image) is viewed as a unit amount of soil piled on a metric space M, the result is the minimum "cost" of turning one pile into the other, or in terms of work, amount of soil times the mean distance it is moved.
 
-The normalized domain distance between the textured-background images and the real-world images is calculated as **0.1188**, while for the white-background images it is **0.4101**. This confirms our assumption that images with a textured background are significantly closer in domain to the real-world images than those with a white background.
+The normalized domain distance between the textured-background images and the real-world images is calculated as **0.1188**, while for the white-background images it is **0.4101**. This confirms the assumption that images with a textured background are significantly closer in domain to the real-world images than those with a white background.
 
 ### Model & Training
 <!-- Why YOLO v8 -->
